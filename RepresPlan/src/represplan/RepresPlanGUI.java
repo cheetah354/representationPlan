@@ -10,6 +10,10 @@ import java.util.Calendar;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -21,6 +25,9 @@ public class RepresPlanGUI extends javax.swing.JFrame {
      * Creates new form RepresPlanGUI
      */
     DataBaseHandler db = new DataBaseHandler();
+    int weekday = setDay();
+    ArrayList<Integer> teacher = new ArrayList<>();
+    int maxHour = 8;
     
     public RepresPlanGUI() {
         initComponents();      
@@ -62,24 +69,10 @@ public class RepresPlanGUI extends javax.swing.JFrame {
         jLabel2.setText("Fehlende Lehrer");
 
         jList1.setModel(allTeacher());
-        jList1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jList1MouseClicked(evt);
-            }
-        });
+        getListItems();
         jScrollPane1.setViewportView(jList1);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
+        jTable1.setModel(new MissingTeacher(teacher, getPlan(teacher), weekday));
         jScrollPane2.setViewportView(jTable1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -118,18 +111,136 @@ public class RepresPlanGUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //change weekday and refresh table
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
         // TODO add your handling code here:
+        weekday = jComboBox1.getSelectedIndex();
+        System.out.println("Weekday changed to: "+ weekday);
         
+        //call refresh Table function
+        refresh();
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
-    private void jList1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jList1MouseClicked
-        // TODO add your handling code here:
-        System.out.println("teacher selected");
-        // get for day all sick teachers, but still check status of each list element
-        // show plans of each teacher next to each other and give some free teachers
-    }//GEN-LAST:event_jList1MouseClicked
+    //get missing Teachers
+    public void getListItems(){
+        jList1.addListSelectionListener(new ListSelectionListener(){
+            
+            @Override
+            public void valueChanged(ListSelectionEvent arg0){
+                if(!arg0.getValueIsAdjusting()){
+                    System.out.println("Missing teachers updated;");
+                    ArrayList<String> dynamic = new ArrayList<>();
+                    dynamic = (ArrayList<String>) jList1.getSelectedValuesList();
+                    
+                    // clearTeacher
+                    teacher.clear();
+                    
+                    for(int i = 0; i < dynamic.size(); i++){
+                        teacher.add(Integer.valueOf(dynamic.get(i)));
+                    }
+                    //call refresh Table function
+                    refresh();
+                    System.out.println("Missing teachers updated;");
+                }
+            }
+        
+        });
+    }
+    
+    //insert missing teachers in table
+    public class MissingTeacher extends AbstractTableModel{
+        private ArrayList<String> teachers = new ArrayList<>();
+        private Object[][] data;
+        private int maxHour;
+        
+        public MissingTeacher(ArrayList<Integer> teachers, Object[][] data2, int maxHour){
+            for(int i = 0; i < teachers.size(); i++){
+                this.teachers.add(teachers.get(i).toString());
+            }
+            //String[] test = (String[]) teachers.toArray();
+            //Object[][] test = {teachers, {}};,
+            this.data = data2.clone();
+            this.maxHour = maxHour;
+        } 
+        
+        //getRows
+        //getColumns
+        @Override
+        public int getColumnCount(){
+            if(teachers.size() > 0){
+                return teachers.size();
+            }else{
+                return 0;
+            }
+        }
+        //get ValueAt
+        //get ColumnName
+        
+        //getRows
+        @Override
+        public int getRowCount() {
+            return maxHour;
+        }
 
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            //Object data = new Object(1, 1);
+            //data.
+            return data;
+        }
+        //get ValueAt
+        //get ColumnName
+        
+    }
+    
+    //rewrite Data
+    public Object[][] getPlan(ArrayList<Integer> teachers){
+        ArrayList<ArrayList<String>> planOld = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> plan = new ArrayList<ArrayList<String>>();
+        ArrayList<String> test = db.getPlan(0 , 3, 8);
+        
+        Object[][] planer = new Object[weekday][];
+        
+        //planer.
+        
+        plan.add(new ArrayList<String>());
+        
+        for(int i = 0; i < teachers.size(); i++){
+            plan.get(i).add(String.valueOf(teachers.get(i)/*.toString()*/));
+            //get plan from each teacher
+            planOld.add(db.getPlan(teachers.get(i), weekday, maxHour));
+        }
+        
+        //convert Plan
+        for(int i = 1; i <= weekday; i++){
+            plan.add(new ArrayList<String>());
+            for(int j = 0; j < teachers.size(); j++){
+                plan.get(i).add(planOld.get(i).get(j));
+            }
+            //planOld.add(db.getPlan(teachers.get(i), weekday, maxHour));
+            //System.out.println(teachers.get(i));
+            //db.getPlan(teachers.get(i), weekday, i)
+        }
+        
+        //String[] test = (String[]) teachers.toArray();
+            //Object[][] test = {teachers, {}};,
+        
+        for(int i = 0; i < weekday; i++){
+            planer[i] = plan.get(i).toArray();
+            //test[i] = (String[]) plan.get(i).toArray();
+            //test.add(i, plan.get(i).toArray());
+        }
+        
+        return planer;
+    }
+    
+    public void refresh(){
+        System.out.println("Refreshing...");
+        getPlan(teacher);
+    }
+    
+    
+    
     //set Weekday - Dropddon
     public int setDay(){
         Calendar calendar = Calendar.getInstance();
