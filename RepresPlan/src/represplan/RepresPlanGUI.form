@@ -29,13 +29,13 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="1" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jLabel1" min="-2" pref="109" max="-2" attributes="0"/>
-                  <Component id="jScrollPane2" min="-2" pref="442" max="-2" attributes="0"/>
+                  <Component id="jScrollPane4" alignment="0" min="-2" pref="398" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="separate" max="32767" attributes="0"/>
+              <EmptySpace pref="23" max="32767" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jLabel2" min="-2" pref="103" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -59,11 +59,11 @@
                   <Group type="102" attributes="0">
                       <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="jScrollPane1" max="32767" attributes="0"/>
+                      <Component id="jScrollPane1" min="-2" pref="333" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="jScrollPane2" min="-2" pref="361" max="-2" attributes="0"/>
+                  <Component id="jScrollPane4" pref="0" max="32767" attributes="0"/>
               </Group>
-              <EmptySpace pref="22" max="32767" attributes="0"/>
+              <EmptySpace pref="191" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -121,19 +121,22 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JScrollPane" name="jScrollPane2">
+    <Container class="javax.swing.JScrollPane" name="jScrollPane4">
       <AuxValues>
         <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
       </AuxValues>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JTable" name="jTable1">
+        <Component class="javax.swing.JTable" name="jTable3">
           <Properties>
             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="new MissingTeacher(teacher, getPlan(teacher), weekday)" type="code"/>
+              <Connection code="new MissingTeacher(teacher, getPlan(teacher), maxHour)" type="code"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JTable(new MissingTeacher(teacher, getPlan(teacher), maxHour))"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>

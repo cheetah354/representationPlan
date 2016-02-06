@@ -9,15 +9,21 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import javax.swing.DefaultListModel;
+import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 /**
  *
  * @author adrianopaulus
+ * TODO recreate Project and creat own user Interface <-- Problems with Tabel 
+ * <-- http://www.java2s.com/Code/Java/Swing-JFC/TablewithacustomTableModel.htm
+ * <-- https://docs.oracle.com/javase/tutorial/uiswing/components/table.html
  */
 public class RepresPlanGUI extends javax.swing.JFrame {
 
@@ -50,8 +56,8 @@ public class RepresPlanGUI extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList();
         jList1.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jTable3 = new JTable(new MissingTeacher(teacher, getPlan(teacher), maxHour));
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -72,19 +78,19 @@ public class RepresPlanGUI extends javax.swing.JFrame {
         getListItems();
         jScrollPane1.setViewportView(jList1);
 
-        jTable1.setModel(new MissingTeacher(teacher, getPlan(teacher), weekday));
-        jScrollPane2.setViewportView(jTable1);
+        jTable3.setModel(new MissingTeacher(teacher, getPlan(teacher), maxHour));
+        jScrollPane4.setViewportView(jTable3);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 442, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, Short.MAX_VALUE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 398, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -103,9 +109,9 @@ public class RepresPlanGUI extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane1))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(22, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap(191, Short.MAX_VALUE))
         );
 
         pack();
@@ -128,15 +134,18 @@ public class RepresPlanGUI extends javax.swing.JFrame {
             @Override
             public void valueChanged(ListSelectionEvent arg0){
                 if(!arg0.getValueIsAdjusting()){
-                    System.out.println("Missing teachers updated;");
                     ArrayList<String> dynamic = new ArrayList<>();
                     dynamic = (ArrayList<String>) jList1.getSelectedValuesList();
+                    String convert;
                     
                     // clearTeacher
                     teacher.clear();
                     
                     for(int i = 0; i < dynamic.size(); i++){
-                        teacher.add(Integer.valueOf(dynamic.get(i)));
+                        convert = dynamic.get(i);
+                        convert = convert.replaceAll("\\s", "");
+                        convert = convert.replaceAll("[^\\d.]", "");
+                        teacher.add(Integer.parseInt(convert));
                     }
                     //call refresh Table function
                     refresh();
@@ -161,7 +170,7 @@ public class RepresPlanGUI extends javax.swing.JFrame {
             //Object[][] test = {teachers, {}};,
             this.data = data2.clone();
             this.maxHour = maxHour;
-        } 
+        }
         
         //getRows
         //getColumns
@@ -186,11 +195,23 @@ public class RepresPlanGUI extends javax.swing.JFrame {
         public Object getValueAt(int rowIndex, int columnIndex) {
             //Object data = new Object(1, 1);
             //data.
-            return data;
+            return data[rowIndex][columnIndex];
+        }
+        
+        @Override
+        public Class getColumnClass(int c) {
+            return getValueAt(0, c).getClass();
+        }
+        
+        @Override
+        public void setValueAt(Object value, int row, int col) {
+            data[row][col] = value;
+            fireTableCellUpdated(row, col);
+            fireTableStructureChanged();
         }
         //get ValueAt
         //get ColumnName
-        
+       
     }
     
     //rewrite Data
@@ -203,7 +224,7 @@ public class RepresPlanGUI extends javax.swing.JFrame {
         
         //planer.
         
-        plan.add(new ArrayList<String>());
+        plan.add(new ArrayList<>());
         
         for(int i = 0; i < teachers.size(); i++){
             plan.get(i).add(String.valueOf(teachers.get(i)/*.toString()*/));
@@ -213,9 +234,9 @@ public class RepresPlanGUI extends javax.swing.JFrame {
         
         //convert Plan
         for(int i = 1; i <= weekday; i++){
-            plan.add(new ArrayList<String>());
+            plan.add(new ArrayList<>());
             for(int j = 0; j < teachers.size(); j++){
-                plan.get(i).add(planOld.get(i).get(j));
+                plan.get(i).add(planOld.get(j).get(i-1));
             }
             //planOld.add(db.getPlan(teachers.get(i), weekday, maxHour));
             //System.out.println(teachers.get(i));
@@ -237,6 +258,14 @@ public class RepresPlanGUI extends javax.swing.JFrame {
     public void refresh(){
         System.out.println("Refreshing...");
         getPlan(teacher);
+        //refresh table
+        AbstractTableModel model = new MissingTeacher(teacher, getPlan(teacher), weekday);
+        jTable3.setModel(model);
+        //model.fireTableChanged();
+        model.fireTableDataChanged();
+        model.fireTableStructureChanged();
+        //jTable1.repaint();
+        System.out.println("...complete");
     }
     
     
@@ -296,6 +325,7 @@ public class RepresPlanGUI extends javax.swing.JFrame {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new RepresPlanGUI().setVisible(true);
             }
@@ -310,7 +340,7 @@ public class RepresPlanGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JList jList1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JTable jTable3;
     // End of variables declaration//GEN-END:variables
 }
